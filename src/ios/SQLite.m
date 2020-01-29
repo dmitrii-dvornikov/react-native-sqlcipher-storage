@@ -72,6 +72,8 @@ RCT_EXPORT_MODULE();
 @synthesize openDBs;
 @synthesize appDBPaths;
 
+int SQLIndex = 0;
+
 - (id) init
 {
   NSLog(@"Initializing SQLitePlugin");
@@ -300,7 +302,7 @@ RCT_EXPORT_METHOD(delete: (NSDictionary *) options success:(RCTResponseSenderBlo
 }
 
 
-RCT_EXPORT_METHOD(backgroundExecuteSqlBatch: (NSDictionary *) options success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error)
+RCT_EXPORT_METHOD(backgroundExecuteSqlBatch: (NSDictionary *) options success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error sqlIndex:(NSString *)sqlIndex)
 {
   [self runInBackground:^{
     [self executeSqlBatch: options success:success error:error];
@@ -398,6 +400,8 @@ RCT_EXPORT_METHOD(executeSql: (NSDictionary *) options success:(RCTResponseSende
   NSObject *insertId;
   NSObject *rowsAffected;
 
+  int _sqlIndex = ++SQLIndex;
+
   hasInsertId = NO;
   previousRowsAffected = sqlite3_total_changes(db);
   previousInsertId = sqlite3_last_insert_rowid(db);
@@ -411,7 +415,9 @@ RCT_EXPORT_METHOD(executeSql: (NSDictionary *) options success:(RCTResponseSende
     }
   }
 
-  NSLog(@">> executeSqlWithDict: %@", sql);
+  long long startTime = ([[NSDate date] timeIntervalSince1970] * 1000.0 * 1000.0);
+  NSLog(@"*** Native %d %lld START %@", _sqlIndex, startTime, sql);
+
   while (keepGoing) {
     result = sqlite3_step (statement);
     switch (result) {
@@ -489,7 +495,8 @@ RCT_EXPORT_METHOD(executeSql: (NSDictionary *) options success:(RCTResponseSende
     return [SQLiteResult resultWithStatus:SQLiteStatus_ERROR messageAsDictionary:error];
   }
 
-  NSLog(@"<< executeSqlWithDict: OKAY(%@) %@", rowsAffected, sql);
+  long long endTime = ([[NSDate date] timeIntervalSince1970] * 1000.0 * 1000.0);
+  NSLog(@"*** Native %d %lld END %@", _sqlIndex, endTime, sql);
 
   [resultSet setObject:resultRows forKey:@"rows"];
   [resultSet setObject:rowsAffected forKey:@"rowsAffected"];
