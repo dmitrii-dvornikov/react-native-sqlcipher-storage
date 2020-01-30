@@ -43,7 +43,7 @@ typedef int WebSQLError;
 -(void) delete: (NSDictionary *) options success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error;
 
 // Batch processing interface
--(void) backgroundExecuteSqlBatch: (NSDictionary *) options success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error sqlIndex:(NSString *)sqlIndex;
+-(void) backgroundExecuteSqlBatch: (NSDictionary *) options sqlIndex:(int)sqlIndex success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error ;
 -(void) executeSqlBatch: (NSDictionary *) options success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error;
 
 // Single requests interface

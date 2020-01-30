@@ -65,6 +65,7 @@ static void sqlite_regexp(sqlite3_context* context, int argc, sqlite3_value** va
 }
 
 
+
 @implementation SQLite
 
 RCT_EXPORT_MODULE();
@@ -76,7 +77,7 @@ int SQLIndex = 0;
 
 - (id) init
 {
-  NSLog(@"Initializing SQLitePlugin");
+  NSLog(@"Initializing SQLitePlugin2");
   self = [super init];
   if (self) {
     openDBs = [NSMutableDictionary dictionaryWithCapacity:0];
@@ -302,14 +303,14 @@ RCT_EXPORT_METHOD(delete: (NSDictionary *) options success:(RCTResponseSenderBlo
 }
 
 
-RCT_EXPORT_METHOD(backgroundExecuteSqlBatch: (NSDictionary *) options success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error sqlIndex:(NSString *)sqlIndex)
+RCT_EXPORT_METHOD(backgroundExecuteSqlBatch: (NSDictionary *) options sqlIndex:(int)sqlIndex success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error)
 {
   [self runInBackground:^{
-    [self executeSqlBatch: options success:success error:error];
+    [self executeSqlBatch: options sqlIndex:sqlIndex success:success error:error];
   }];
 }
 
-RCT_EXPORT_METHOD(executeSqlBatch: (NSDictionary *) options success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error)
+RCT_EXPORT_METHOD(executeSqlBatch: (NSDictionary *) options sqlIndex:(int)sqlIndex success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error)
 {
   NSMutableArray *results = [NSMutableArray arrayWithCapacity:0];
   NSMutableDictionary *dbargs = [options objectForKey:@"dbargs"];
@@ -319,7 +320,7 @@ RCT_EXPORT_METHOD(executeSqlBatch: (NSDictionary *) options success:(RCTResponse
 
   @synchronized(self) {
     for (NSMutableDictionary *dict in executes) {
-      SQLiteResult *result = [self executeSqlWithDict:dict andArgs:dbargs];
+      SQLiteResult *result = [self executeSqlWithDict:dict sqlIndex:sqlIndex andArgs:dbargs];
       if ([result.status intValue] == SQLiteStatus_ERROR) {
         /* add error with result.message: */
         NSMutableDictionary *r = [NSMutableDictionary dictionaryWithCapacity:4];
@@ -358,13 +359,13 @@ RCT_EXPORT_METHOD(executeSql: (NSDictionary *) options success:(RCTResponseSende
 
   SQLiteResult* pluginResult;
   @synchronized (self) {
-    pluginResult = [self executeSqlWithDict: ex andArgs: dbargs];
+    pluginResult = [self executeSqlWithDict: ex sqlIndex:0 andArgs: dbargs];
   }
 
   success(@[pluginResult.message]);
 }
 
--(SQLiteResult *) executeSqlWithDict: (NSMutableDictionary*)options andArgs: (NSMutableDictionary*)dbargs
+-(SQLiteResult *) executeSqlWithDict: (NSMutableDictionary*)options sqlIndex:(int)sqlIndex andArgs: (NSMutableDictionary*)dbargs
 {
   NSString *dbFileName = [dbargs objectForKey:@"dbname"];
   if (dbFileName == NULL) {
@@ -400,8 +401,6 @@ RCT_EXPORT_METHOD(executeSql: (NSDictionary *) options success:(RCTResponseSende
   NSObject *insertId;
   NSObject *rowsAffected;
 
-  int _sqlIndex = ++SQLIndex;
-
   hasInsertId = NO;
   previousRowsAffected = sqlite3_total_changes(db);
   previousInsertId = sqlite3_last_insert_rowid(db);
@@ -416,7 +415,7 @@ RCT_EXPORT_METHOD(executeSql: (NSDictionary *) options success:(RCTResponseSende
   }
 
   long long startTime = ([[NSDate date] timeIntervalSince1970] * 1000.0 * 1000.0);
-  NSLog(@"*** Native %d %lld START %@", _sqlIndex, startTime, sql);
+  
 
   while (keepGoing) {
     result = sqlite3_step (statement);
@@ -496,8 +495,13 @@ RCT_EXPORT_METHOD(executeSql: (NSDictionary *) options success:(RCTResponseSende
   }
 
   long long endTime = ([[NSDate date] timeIntervalSince1970] * 1000.0 * 1000.0);
-  NSLog(@"*** Native %d %lld END %@", _sqlIndex, endTime, sql);
+  
+  NSObject *sqlTiming = [NSNumber numberWithLongLong:endTime - startTime];
+  NSObject *_sqlIndex = [NSString stringWithFormat:@"%d",sqlIndex];
 
+  [resultSet setObject:_sqlIndex forKey:@"sqlIndex"];
+  [resultSet setObject:sqlTiming forKey:@"sqlTiming"];
+  
   [resultSet setObject:resultRows forKey:@"rows"];
   [resultSet setObject:rowsAffected forKey:@"rowsAffected"];
   if (hasInsertId) {
