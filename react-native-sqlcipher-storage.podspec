@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
   s.platform     = :ios, "9.0"
 
   s.source       = { :git => "https://github.com/axsy-dev/react-native-sqlcipher-storage.git", :tag => "v#{s.version}" }
-  s.source_files  = "src/ios/**/*.{h,m,c}"
+  s.source_files  = "src/ios/*.{h,m}", "src/common/*.{h,c}"
 
   s.dependency 'React'
 end
