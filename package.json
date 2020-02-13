@@ -2,10 +2,12 @@
   "name": "react-native-sqlcipher-storage",
   "version": "0.0.4",
   "description": "SQLCipher bindings for React Native (Android & iOS)",
-  "main": "sqlite.js",
+  "main": "src/index.js",
   "author": "Axsy",
   "scripts": {
-    "test": "echo \"Error: no test specified yet\" && exit 1"
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "start:android": "react-native run-android --root example/",
+    "start:ios": "react-native run-ios --project-path example/ios --scheme example"
   },
   "repository": {
     "type": "git",
@@ -30,18 +32,23 @@
   },
   "homepage": "https://github.com/axsy-dev/react-native-sqlcipher-storage",
   "peerDependencies": {
-    "react": "16.8.6",
-    "react-native": "0.60.6",
-    "react-native-windows": "^0.60.0-vnext.136"
+    "react": "*",
+    "react-native": "*",
+    "react-native-windows": "*"
   },
   "devDependencies": {
-    "@react-native-community/bob": "^0.9.5",
-    "@react-native-community/cli": "^2.0.0",
     "react": "16.8.6",
     "react-native": "0.60.6",
     "react-native-windows": "^0.60.0-vnext.136"
   },
   "dependencies": {
     "base-64": "^0.1.0"
-  }
+  },
+  "files": [
+    "src",
+    "react-native-sqlcipher-storage.podspec",
+    "android",
+    "ios",
+    "windows"
+  ]
 }

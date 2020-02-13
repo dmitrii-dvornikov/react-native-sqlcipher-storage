@@ -8,7 +8,7 @@
  * See http://opensource.org/licenses/alphabetical for full text.
  */
 
-import plugin, { SQLiteFactory } from "./lib/sqlite.core.js";
+import plugin, { SQLiteFactory } from "./sqlite.core.js";
 
 var config = [
   [false, "SQLitePlugin", "transaction", false, true],
