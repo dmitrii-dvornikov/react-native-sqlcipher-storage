@@ -1,10 +1,5 @@
-// react-native.config.js
-/*
+const fs = require('fs');
+const path = require('path');
 module.exports = {
-  dependencies: {
-    'react-native-sqlcipher-storage': {
-      root: '../',
-    },
-  },
+  reactNativePath:  fs.realpathSync(path.resolve(require.resolve('react-native-windows/package.json'), '..')),
 };
-*/
